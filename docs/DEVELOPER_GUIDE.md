@@ -1,6 +1,16 @@
 # Developer Guide: Automated PR Assistant
 
-Written by Member 3 (foundation and MCP). Read this before you start your module.
+Written by Lalit (Member 3, foundation and MCP). Read this before you start your module.
+
+## Team
+
+| Member | Name | Role |
+|---|---|---|
+| 1 | Nanda | Repo, test data, end-to-end testing and recording |
+| 2 | Karthik | Test cases, verification and documentation |
+| 3 | Lalit | Developer: foundation and MCP |
+| 4 | Kumar | Developer: PR summary pipeline |
+| 5 | Aneesh | Developer: branch cleanup and Orchestrate |
 
 ## 1. What we are building
 
@@ -47,16 +57,16 @@ flowchart LR
 
 | Path | Owner | Status | Purpose |
 |---|---|---|---|
-| `models.py` | M3 | done | Shared dataclasses. **The contract between modules.** |
-| `config.py`, `config.yaml` | M3 | done | Settings loading. Thresholds live in `config.yaml`. |
-| `cli.py` | M3 | done | `summarize`, `cleanup`, `all`. |
-| `mcp_client.py` | M3 | done | GitHub MCP client with pagination. |
-| `.bob/mcp.json` | M3 | written, not yet tested in Bob Shell | Bob's MCP server config. |
-| `tests/test_mcp_client.py` | M3 | done | Mocked tests. |
-| `risk.py`, `reviewers.py`, `narrative.py`, `report.py` | M4 | todo | Summary pipeline. |
-| `bob_runner.py`, `branches.py`, `cleanup.py`, `orchestrate/` | M5 | todo | Branch cleanup and Orchestrate. |
-| `scripts/seed_demo_repo.py` | M1 | todo | Demo data. |
-| `README.md`, HLD, LLD, demo script | M2 | todo | Documentation. |
+| `models.py` | Lalit | done | Shared dataclasses. **The contract between modules.** |
+| `config.py`, `config.yaml` | Lalit | done | Settings loading. Thresholds live in `config.yaml`. |
+| `cli.py` | Lalit | done | `summarize`, `cleanup`, `all`. |
+| `mcp_client.py` | Lalit | done | GitHub MCP client with pagination. |
+| `.bob/mcp.json` | Lalit | written, not yet tested in Bob Shell | Bob's MCP server config. |
+| `tests/test_mcp_client.py` | Lalit | done | Mocked tests. |
+| `risk.py`, `reviewers.py`, `narrative.py`, `report.py` | Kumar | todo | Summary pipeline. |
+| `bob_runner.py`, `branches.py`, `cleanup.py`, `orchestrate/` | Aneesh | todo | Branch cleanup and Orchestrate. |
+| `scripts/seed_demo_repo.py` | Nanda | todo | Demo data. |
+| `README.md`, HLD, LLD, demo script | Karthik | todo | Documentation. |
 
 ## 4. Setup
 
@@ -73,7 +83,7 @@ copy .env.example .env      # then fill in the values, see below
 
 | Variable | Needed for | Notes |
 |---|---|---|
-| `GITHUB_TOKEN` | everything | Fine-grained token: read/write on repo contents and pull requests. Ask Member 1 for it. **Never paste it in chat or in git.** |
+| `GITHUB_TOKEN` | everything | Fine-grained token: read/write on repo contents and pull requests. Ask Nanda for it. **Never paste it in chat or in git.** |
 | `GITHUB_OWNER` | everything | `psl-lalit-paliwal` |
 | `GITHUB_REPO` | everything | `Automated-PR-Assistant` (the name only, not a URL) |
 | `BOB_API_KEY` | `cleanup`, `all`, narrative | Created at bob.ibm.com with Scope = **Inference**. |
@@ -132,9 +142,9 @@ Do not change a field without telling the other developers.
 
 ## 7. What the CLI expects from your module
 
-`cli.py` imports your module only when needed, and prints a clear message if it is missing. **Match these signatures**, or tell Member 3 so the CLI can change.
+`cli.py` imports your module only when needed, and prints a clear message if it is missing. **Match these signatures**, or tell Lalit so the CLI can change.
 
-### Member 4 (summary pipeline)
+### Kumar (Member 4, summary pipeline)
 ```python
 risk.assess(pr: PullRequest, settings: Settings) -> RiskAssessment
 async reviewers.suggest(pr: PullRequest, client: GitHubMCPClient, settings: Settings) -> list[str]
@@ -143,7 +153,7 @@ report.write(summaries: list[PullRequestSummary], settings: Settings) -> None
 ```
 `pr.files` is already filled in by the CLI when your functions are called. `report.write` creates `settings.output_dir` and writes `pr_summaries.json` and `pr_summaries.md`.
 
-### Member 5 (cleanup)
+### Aneesh (Member 5, cleanup)
 ```python
 async cleanup.run(client: GitHubMCPClient, settings: Settings, execute: bool) -> list[BranchDecision]
 ```
@@ -161,7 +171,7 @@ async with GitHubMCPClient(settings) as client:
 
 - All four methods **paginate** automatically (page size `github.per_page`, stops on a short page).
 - Errors raise `MCPError`.
-- It reads `GITHUB_OWNER` and `GITHUB_REPO` from settings. For other calls (for example `list_commits` for recent authors, or `get_file_contents` for CODEOWNERS), use the internal `client._call("tool_name", **args)`. Owner and repo are added for you. Ask Member 3 if you want a public method added.
+- It reads `GITHUB_OWNER` and `GITHUB_REPO` from settings. For other calls (for example `list_commits` for recent authors, or `get_file_contents` for CODEOWNERS), use the internal `client._call("tool_name", **args)`. Owner and repo are added for you. Ask Lalit if you want a public method added.
 - **Testing without network:** `GitHubMCPClient(settings, session=fake)`, where `fake` has an async `call_tool(name, arguments)` returning an object with `.is_error` and `.content[0].text`. See `tests/test_mcp_client.py` for a ready `FakeSession`.
 
 ## 9. GitHub MCP facts (verified against the live server)
@@ -185,7 +195,7 @@ Response notes:
 - A commit date is at `commit.committer.date`.
 
 ### Branch delete is NOT available through MCP
-The server has **no `delete_branch` tool**. The only delete-like tool is `delete_file`, which removes a file, not a branch. This is a design problem for `cleanup.py` (Member 5). The options:
+The server has **no `delete_branch` tool**. The only delete-like tool is `delete_file`, which removes a file, not a branch. This is a design problem for `cleanup.py` (Aneesh, Member 5). The options:
 1. Bob Shell runs the delete itself, through its shell tool: `git push origin --delete <branch>` or `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>`.
 2. `cleanup.py` calls the GitHub REST API directly.
 
@@ -222,8 +232,8 @@ Either way, verification afterwards can still use `list_branches` over MCP. The 
 
 | # | Gap | Owner |
 |---|---|---|
-| 1 | Test `.bob/mcp.json` in Bob Shell (`${VAR}` expansion, `type` line) | M3 |
-| 2 | Decide how branches are deleted, since MCP has no tool for it | M5 and team |
-| 3 | The demo repo is empty. Response shapes for PRs and branches were verified on a public repo, so re-check them on the seeded repo. | M1 and M3 |
-| 4 | Implement the modules listed in section 3 as `todo` | M4, M5 |
-| 5 | Run `cli.py summarize` end to end once M4 lands | M3 |
+| 1 | Test `.bob/mcp.json` in Bob Shell (`${VAR}` expansion, `type` line) | Lalit |
+| 2 | Decide how branches are deleted, since MCP has no tool for it | Aneesh and team |
+| 3 | The demo repo is empty. Response shapes for PRs and branches were verified on a public repo, so re-check them on the seeded repo. | Nanda and Lalit |
+| 4 | Implement the modules listed in section 3 as `todo` | Kumar, Aneesh |
+| 5 | Run `cli.py summarize` end to end once Kumar lands | Lalit |

@@ -20,7 +20,7 @@ Auth: `Authorization: Bearer <GITHUB_TOKEN>`. Server exposes 46 tools.
 There is no `delete_branch` tool. The only delete-like tool is `delete_file`, which removes a file, not a branch.
 Neither `git push --delete` nor the REST call `DELETE /repos/{o}/{r}/git/refs/heads/{branch}` is exposed through MCP.
 
-Consequences for Member 5 (`cleanup.py`):
+Consequences for Aneesh (Member 5, `cleanup.py`):
 - Bob cannot delete a branch through this MCP server.
 - Options: (a) Bob Shell runs the delete itself through its shell tool, for example
   `git push origin --delete <branch>` or `gh api -X DELETE repos/<o>/<r>/git/refs/heads/<branch>`;

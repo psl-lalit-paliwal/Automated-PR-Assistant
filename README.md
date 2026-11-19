@@ -10,17 +10,27 @@ The tool connects to a live GitHub repository through the **remote GitHub MCP se
 
 The risk flag and the reviewers come from **fixed rules**, not from the AI. Bob only writes a short narrative summary and runs the branch deletion.
 
+## Team
+
+| Member | Name | Role |
+|---|---|---|
+| 1 | Nanda | Repo, test data, end-to-end testing and recording |
+| 2 | Karthik | Test cases, verification and documentation |
+| 3 | Lalit | Developer: foundation and MCP |
+| 4 | Kumar | Developer: PR summary pipeline |
+| 5 | Aneesh | Developer: branch cleanup and Orchestrate |
+
 ## Status
 
 | Area | Owner | Status |
 |---|---|---|
-| Project skeleton, config, models, CLI | Member 3 | Done |
-| GitHub MCP client (`mcp_client.py`) and tests | Member 3 | Done |
-| `.bob/mcp.json` | Member 3 | Written, not yet tested in Bob Shell |
-| Risk, reviewers, narrative, report | Member 4 | To do |
-| Bob runner, branches, cleanup, Orchestrate | Member 5 | To do |
-| Demo repo seed script, end-to-end tests, recording | Member 1 | To do |
-| Test cases, design documents, demo script | Member 2 | To do |
+| Project skeleton, config, models, CLI | Lalit (Member 3) | Done |
+| GitHub MCP client (`mcp_client.py`) and tests | Lalit (Member 3) | Done |
+| `.bob/mcp.json` | Lalit (Member 3) | Written, not yet tested in Bob Shell |
+| Risk, reviewers, narrative, report | Kumar (Member 4) | To do |
+| Bob runner, branches, cleanup, Orchestrate | Aneesh (Member 5) | To do |
+| Demo repo seed script, end-to-end tests, recording | Nanda (Member 1) | To do |
+| Test cases, design documents, demo script | Karthik (Member 2) | To do |
 
 ## Quick start
 
@@ -42,7 +52,7 @@ On macOS or Linux, activate with `source .venv/bin/activate` and copy with `cp .
 
 | Variable | Purpose |
 |---|---|
-| `GITHUB_TOKEN` | Fine-grained token with read/write on repo contents and pull requests. Ask Member 1. |
+| `GITHUB_TOKEN` | Fine-grained token with read/write on repo contents and pull requests. Ask Nanda. |
 | `GITHUB_OWNER` | Repository owner, `psl-lalit-paliwal` |
 | `GITHUB_REPO` | Repository name only, `Automated-PR-Assistant` |
 | `BOB_API_KEY` | Bob API key, Scope = Inference. Needed for cleanup and the narrative. |
@@ -101,7 +111,7 @@ flowchart LR
 - Run `python -m pytest -q` before every push. Tests must not need the network or a real token.
 - Commit on a branch and open a pull request, instead of pushing straight to `main`.
 
-**Member 4 (summary pipeline).** Implement these signatures, because `cli.py` calls them:
+**Kumar (Member 4, summary pipeline).** Implement these signatures, because `cli.py` calls them:
 ```python
 risk.assess(pr, settings) -> RiskAssessment
 async reviewers.suggest(pr, client, settings) -> list[str]
@@ -109,18 +119,18 @@ narrative.summarize(pr, risk, settings) -> str
 report.write(summaries, settings) -> None     # writes output/pr_summaries.json and .md
 ```
 
-**Member 5 (cleanup).** Implement this signature:
+**Aneesh (Member 5, cleanup).** Implement this signature:
 ```python
 async cleanup.run(client, settings, execute: bool) -> list[BranchDecision]
 ```
 
-**Important: the GitHub MCP server has no branch-delete tool.** Its only delete-like tool is `delete_file`, which removes a file, not a branch. Member 5 and the team must decide how Bob deletes branches. Either Bob Shell runs `git push origin --delete <branch>` through its shell tool, or `cleanup.py` calls the GitHub REST API. Verification afterwards can still use `list_branches` over MCP. Details are in the [developer guide](docs/DEVELOPER_GUIDE.md#branch-delete-is-not-available-through-mcp).
+**Important: the GitHub MCP server has no branch-delete tool.** Its only delete-like tool is `delete_file`, which removes a file, not a branch. Aneesh (Member 5) and the team must decide how Bob deletes branches. Either Bob Shell runs `git push origin --delete <branch>` through its shell tool, or `cleanup.py` calls the GitHub REST API. Verification afterwards can still use `list_branches` over MCP. Details are in the [developer guide](docs/DEVELOPER_GUIDE.md#branch-delete-is-not-available-through-mcp).
 
-**Member 1.** The demo repo is currently empty. The MCP response shapes were verified on a public repo, so please tell Member 3 if the seeded data looks different.
+**Nanda (Member 1, repo and testing).** The demo repo is currently empty. The MCP response shapes were verified on a public repo, so please tell Lalit if the seeded data looks different.
 
 ## Open items
 
 1. Test `.bob/mcp.json` in Bob Shell: whether `${GITHUB_TOKEN}` is expanded in `headers`, and whether `"type": "streamable-http"` is needed.
 2. Decide how branches are deleted, since MCP has no tool for it.
-3. Run `cli.py summarize` end to end once Member 4's modules land.
+3. Run `cli.py summarize` end to end once Kumar's modules land.
 4. Create a fine-grained GitHub token limited to this repository. Revoke any classic token that was shared.

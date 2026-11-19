@@ -3,13 +3,13 @@
 The other modules are imported lazily, so this CLI runs as soon as the pieces
 it needs have landed. Expected interfaces (agree changes with the owners):
 
-  summarize (Member 4):
+  summarize (Member 4, Kumar):
     risk.assess(pr, settings)                  -> RiskAssessment
     reviewers.suggest(pr, client, settings)    -> list[str]
     narrative.summarize(pr, risk, settings)    -> str
     report.write(summaries, settings)          -> None  (writes output/ files)
 
-  cleanup (Member 5):
+  cleanup (Member 5, Aneesh):
     cleanup.run(client, settings, execute: bool) -> list[BranchDecision]
 """
 
