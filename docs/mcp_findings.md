@@ -26,3 +26,11 @@ Consequences for Aneesh (Member 5, `cleanup.py`):
   `git push origin --delete <branch>` or `gh api -X DELETE repos/<o>/<r>/git/refs/heads/<branch>`;
   (b) call the GitHub REST API directly from Python.
 - Verification after delete can still use `list_branches` through MCP.
+
+## Bob Shell 2.1.0 results
+
+- The GitHub MCP server connects from .bob/mcp.json and Bob loads 46 tools.
+- Header expansion uses ${env:NAME}. A bare ${NAME} is sent as literal text.
+- 	ype: streamable-http is optional. The result is the same with and without it.
+- ob run needs BOB_API_KEY.
+

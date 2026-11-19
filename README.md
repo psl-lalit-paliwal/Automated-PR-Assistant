@@ -1,4 +1,4 @@
-# Automated PR Assistant
+﻿# Automated PR Assistant
 
 AI-autonomous GitHub integration via MCP for continuous SDLC operations.
 
@@ -26,7 +26,7 @@ The risk flag and the reviewers come from **fixed rules**, not from the AI. Bob 
 |---|---|---|
 | Project skeleton, config, models, CLI | Lalit (Member 3) | Done |
 | GitHub MCP client (`mcp_client.py`) and tests | Lalit (Member 3) | Done |
-| `.bob/mcp.json` | Lalit (Member 3) | Written, not yet tested in Bob Shell |
+| `.bob/mcp.json` | Lalit (Member 3) | Tested in Bob Shell 2.1.0: connects, 46 tools. Uses `${env:GITHUB_TOKEN}` |
 | Risk, reviewers, narrative, report | Kumar (Member 4) | To do |
 | Bob runner, branches, cleanup, Orchestrate | Aneesh (Member 5) | To do |
 | Demo repo seed script, end-to-end tests, recording | Nanda (Member 1) | To do |
@@ -130,7 +130,7 @@ async cleanup.run(client, settings, execute: bool) -> list[BranchDecision]
 
 ## Open items
 
-1. Test `.bob/mcp.json` in Bob Shell: whether `${GITHUB_TOKEN}` is expanded in `headers`, and whether `"type": "streamable-http"` is needed.
+1. Run a full `bob chat` or `bob run` test once a `BOB_API_KEY` is available. The MCP connection itself is verified.
 2. Decide how branches are deleted, since MCP has no tool for it.
 3. Run `cli.py summarize` end to end once Kumar's modules land.
 4. Create a fine-grained GitHub token limited to this repository. Revoke any classic token that was shared.

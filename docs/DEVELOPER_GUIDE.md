@@ -1,4 +1,4 @@
-# Developer Guide: Automated PR Assistant
+﻿# Developer Guide: Automated PR Assistant
 
 Written by Lalit (Member 3, foundation and MCP). Read this before you start your module.
 
@@ -61,7 +61,7 @@ flowchart LR
 | `config.py`, `config.yaml` | Lalit | done | Settings loading. Thresholds live in `config.yaml`. |
 | `cli.py` | Lalit | done | `summarize`, `cleanup`, `all`. |
 | `mcp_client.py` | Lalit | done | GitHub MCP client with pagination. |
-| `.bob/mcp.json` | Lalit | written, not yet tested in Bob Shell | Bob's MCP server config. |
+| `.bob/mcp.json` | Lalit | tested in Bob Shell 2.1.0: connects, 46 tools | Bob's MCP server config. |
 | `tests/test_mcp_client.py` | Lalit | done | Mocked tests. |
 | `risk.py`, `reviewers.py`, `narrative.py`, `report.py` | Kumar | todo | Summary pipeline. |
 | `bob_runner.py`, `branches.py`, `cleanup.py`, `orchestrate/` | Aneesh | todo | Branch cleanup and Orchestrate. |
@@ -208,17 +208,16 @@ Either way, verification afterwards can still use `list_branches` over MCP. The 
   "mcpServers": {
     "github": {
       "url": "https://api.githubcopilot.com/mcp/",
-      "headers": { "Authorization": "Bearer ${GITHUB_TOKEN}" }
+      "headers": { "Authorization": "Bearer ${env:GITHUB_TOKEN}" }
     }
   }
 }
 ```
 
-**Not yet tested inside Bob Shell.** Open questions to check once Bob Shell is installed:
-- Does Bob Shell expand `${GITHUB_TOKEN}` inside `headers`? The Bob docs do not say. If it does not, the 401 response will show the literal text. Fallback: generate the file at run time, never commit a real token.
-- Is `"type": "streamable-http"` needed? The Bob Shell docs show only `url`. The IDE docs show the `type` line.
-- `bob run` needs `BOB_API_KEY` (an Inference-scope key). Without it, it exits with an authentication error.
-
+**Tested with Bob Shell 2.1.0.** The server connects and Bob loads all 46 tools.
+- **Use `${env:NAME}`, not `${NAME}`.** Bob Shell expands `${env:GITHUB_TOKEN}` in `headers`, `env` and `args` before connecting. A bare `${GITHUB_TOKEN}` is not expanded, and the literal text is sent, which gives a 401. Set `GITHUB_TOKEN` in the shell environment before starting Bob.
+- **`"type": "streamable-http"` is not needed.** The config works with and without it, and `bob mcp list` shows the server as `http`.
+- `bob run` and `bob chat` need `BOB_API_KEY` (an Inference-scope key). Without it, they exit with an authentication error, even though the MCP connection works. The key is not stored in the repo.
 ## 11. Rules for working together
 
 - **Never commit** `.env`, tokens or API keys. `.gitignore` already excludes `.env`, `.venv/` and `output/`. Commit `.env.example` with **empty** values only.
@@ -232,7 +231,7 @@ Either way, verification afterwards can still use `list_branches` over MCP. The 
 
 | # | Gap | Owner |
 |---|---|---|
-| 1 | Test `.bob/mcp.json` in Bob Shell (`${VAR}` expansion, `type` line) | Lalit |
+| 1 | Run a full `bob chat` or `bob run` test once a `BOB_API_KEY` is available (MCP connection itself is verified) | Lalit |
 | 2 | Decide how branches are deleted, since MCP has no tool for it | Aneesh and team |
 | 3 | The demo repo is empty. Response shapes for PRs and branches were verified on a public repo, so re-check them on the seeded repo. | Nanda and Lalit |
 | 4 | Implement the modules listed in section 3 as `todo` | Kumar, Aneesh |
