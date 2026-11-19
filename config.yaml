@@ -1,0 +1,38 @@
+# Non-secret settings. Secrets (tokens, keys) live in .env, never here.
+
+github:
+  mcp_url: https://api.githubcopilot.com/mcp/   # verify against GitHub docs
+  per_page: 100                                  # page size for paginated MCP calls
+
+risk:
+  # High risk
+  high_changed_lines: 500        # more than this many changed lines
+  high_changed_files: 30         # more than this many files
+  sensitive_paths:               # any changed path containing one of these -> High
+    - auth
+    - secret
+    - .github/workflows
+    - Dockerfile
+    - migrations
+    - terraform
+  # Medium risk
+  medium_changed_lines: 150
+  medium_changed_files: 10
+  test_path_markers:             # used for "source changed without tests"
+    - test
+    - tests
+    - spec
+
+reviewers:
+  max_suggestions: 3
+
+cleanup:
+  min_age_days: 7
+  protected_branches:            # glob patterns, never deleted
+    - main
+    - master
+    - develop
+    - release/*
+
+output:
+  dir: output
